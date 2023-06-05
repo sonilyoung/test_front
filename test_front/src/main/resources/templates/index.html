@@ -1,0 +1,214 @@
+<!--로그인 페이지-->
+<!-- login.html-->
+<!DOCTYPE html>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+    function doExcelUpload1(){
+        var f = new FormData(document.getElementById('form1'));
+        $.ajax({
+            url: "http://localhost:8080/common/excel/excelUpload",
+            data: f,
+            processData: false,
+            contentType: false,
+            type: "POST",
+            success: function(data){
+                console.log(data);
+                //document.getElementById('result').innerHTML = JSON.stringify(data);
+            }
+        })
+    }
+    
+    function doExcelUpload2(){
+        var f = new FormData(document.getElementById('form1'));
+        $.ajax({
+            url: "http://localhost:8080/common/excel/fileDown",
+            data: f,
+            processData: false,
+            contentType: false,
+            type: "POST",
+            success: function(data){
+                console.log(data);
+                //document.getElementById('result').innerHTML = JSON.stringify(data);
+            }
+        })
+    }    
+    
+    function doExcelDownloadProcess(){
+    	
+    	const params = {
+    			fileSn : $("#fileSn").val(),
+    			atchFileId : $("#atchFileId").val()
+    	}    	
+        $.ajax({
+            url: "http://localhost:8080/file/fileDown",
+            method: 'POST',
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            dataType: 'json',
+            success: function(data) {
+            	
+            console.log("데이터 확인: ", data);
+            	
+              return;
+              if (data.header.success) {
+                  if(!data.body)
+                      return;
+                  var path = 'path=' + data.body;
+                  location.href = url + '/filedownload?' +  encodeURI(path , "UTF-8");
+                }
+            }
+        });
+    }
+    
+    function download(){
+    	const params = {
+    			fileSn : $("#fileSn").val(),
+    			atchFileId : $("#atchFileId").val()
+    	}
+        $.ajax({
+        	url: "http://localhost:8080/file/fileDown",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            xhrFields: {
+                responseType: "blob",
+            },            
+            type: "POST",
+            success: function(response, status, xhr) {
+                // check for a filename
+                var filename = xhr.getResponseHeader("filename");
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+
+                var type = xhr.getResponseHeader('Content-Type');
+                var blob = new Blob([response], { type: type });
+
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                } else {
+                    var URL = window.URL || window.webkitURL;
+                    var downloadUrl = URL.createObjectURL(blob);
+
+                    if (filename) {
+                        // use HTML5 a[download] attribute to specify filename
+                        var a = document.createElement("a");
+                        // safari doesn't support this yet
+                        if (typeof a.download === 'undefined') {
+                            window.location = downloadUrl;
+                        } else {
+                            a.href = downloadUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                        }
+                    } else {
+                        window.location = downloadUrl;
+                    }
+
+                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                }            	
+            },
+            
+            error: function (XMLHttpRequest, textStatus, errorThrown){
+                console.log('error',  XMLHttpRequest); 
+                console.log('textStatus',  textStatus); 
+                console.log('errorThrown',  errorThrown); 
+                      
+            }
+        })   
+        
+       /* .done(function (blob, status, xhr) {
+            // check for a filename
+            var fileName = "";
+            var disposition = xhr.getResponseHeader("Content-Disposition");
+
+            if (disposition && disposition.indexOf("attachment") !== -1) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+
+                if (matches != null && matches[1]) {
+                    fileName = decodeURI(matches[1].replace(/['"]/g, ""));
+                }
+            }
+
+            // for IE
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blob, fileName);
+            } else {
+                var URL = window.URL || window.webkitURL;
+                var downloadUrl = URL.createObjectURL(blob);
+
+                if (fileName) {
+                    var a = document.createElement("a");
+
+                    // for safari
+                    if (a.download === undefined) {
+                        window.location.href = downloadUrl;
+                    } else {
+                        a.href = downloadUrl;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                    }
+                } else {
+                    window.location.href = downloadUrl;
+                }
+            }
+        });   */     
+    }        
+    
+    //GET 방식 파일다운로드 
+    function getFileDownload(){
+		window.location ="http://61.14.208.2:8102/riskfree-backend/file/fileDown?atchFileId="+$("#atchFileId").val()+"&fileSn="+$("#fileSn").val();
+    }	  
+    
+    //POST방식 파일다운로드
+    function postFileDownload(){
+    	
+    	const params = {
+    			fileSn : $("#fileSn").val(),
+    			atchFileId : $("#atchFileId").val()
+    	}
+    	
+    	 
+        $.ajax({
+            url: "http://localhost:8080/file/fileDown",
+            method: 'POST',
+            data: $("#form2").serialize(),
+            dataType: 'json',
+            success: function(data) {
+            	console.log("데이터 확인: ", data);
+            	location.href = url + '/filedownload?' +  encodeURI(data , "UTF-8");
+            }
+        });		
+    }    
+    
+    //GET 방식 필수내역다운로드 
+    function getEssentailFileDownload(){
+		window.location ="http://localhost:8080/common/excel/getUserDutyExcel?workplaceId=5&baselineId=55";
+    }	    
+</script>
+<form id="form2" name="form2" method="post" >
+    <input type="text" id="atchFileId" name="atchFileId" value="295">
+    <input type="text" id="fileSn" name="fileSn" value="1">
+    <button type="button" onclick="getFileDownload()">엑셀다운로드 작업</button>
+    <button type="button" onclick="getEssentailFileDownload()">필수내역다운로드</button>
+</form>
+
+<form id="form1" name="form1" method="post" enctype="multipart/form-data">
+    <input type="file" id="excelFile" name="excelFile">
+    <button type="button" onclick="doExcelUpload1()">엑셀업로드 작업</button>
+    <button type="button" onclick="doExcelUpload2()">관계법령</button>
+</form>
+<div id="result">
+</div>
+</body>
+</html>

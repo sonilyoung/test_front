@@ -1,0 +1,58 @@
+<!--로그인 페이지-->
+<!-- login.html-->
+<!DOCTYPE html>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+    function doExcelUpload1(){
+        var f = new FormData(document.getElementById('form1'));
+        $.ajax({
+            url: "http://localhost:8080/common/excel/excelUpload",
+            data: f,
+            processData: false,
+            contentType: false,
+            type: "POST",
+            success: function(data){
+                console.log(data);
+                //document.getElementById('result').innerHTML = JSON.stringify(data);
+            }
+        })
+    }
+    
+    function doExcelUpload2(){
+        var f = new FormData(document.getElementById('form1'));
+        $.ajax({
+            url: "http://localhost:8080/common/excel/relatedRawExcelUpload",
+            data: f,
+            processData: false,
+            contentType: false,
+            type: "POST",
+            success: function(data){
+                console.log(data);
+                //document.getElementById('result').innerHTML = JSON.stringify(data);
+            }
+        })
+    }    
+    
+    function doExcelDownloadProcess(){
+        var f = document.form1;
+        f.action = "downloadExcelFile";
+        f.submit();
+    }
+</script>
+<form id="form1" name="form1" method="post" enctype="multipart/form-data">
+    <input type="file" id="excelFile" name="excelFile">
+    <button type="button" onclick="doExcelUpload1()">엑셀업로드 작업</button>
+    <button type="button" onclick="doExcelUpload2()">관계법령</button>
+    <button type="button" onclick="doExcelDownloadProcess()">엑셀다운로드 작업</button>
+</form>
+<div id="result">
+</div>
+</body>
+</html>
